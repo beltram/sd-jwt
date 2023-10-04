@@ -2,6 +2,11 @@
 name = "sd-jwt"
 version = "0.0.1"
 edition = "2021"
+description = "Selective Disclosure JWTs"
+homepage = "https://github.com/beltram/sd-jwt"
+repository = "https://github.com/beltram/sd-jwt"
+keywords = ["jwt"]
+license = "GPL-3.0-only"
 
 [dependencies]
 serde_json = "1.0"
