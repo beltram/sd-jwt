@@ -8,16 +8,33 @@ repository = "https://github.com/beltram/sd-jwt"
 keywords = ["jwt"]
 license = "GPL-3.0-only"
 
+[features]
+# TODO: to facilitate dev in early phases, remove once mature enough
+default = ["issuer"]
+issuer = ["jwt-simple", "base64-simd", "base64ct", "rand_chacha", "sha2", "getrandom"]
+# TODO: remove sha2
+holder = ["sha2"]
+verifier = ["jwt-simple", "sha2", "base64-simd"]
+
 [dependencies]
+serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-base64 = "0.21"
-jwt-simple = "0.11"
 thiserror = "1.0"
+digest = "0.10"
+
+jwt-simple = { version = "0.11", optional = true }
+
+base64ct = { version = "1.6", optional = true }
+base64-simd = { version = "0.8", optional = true }
+
+derive_more = { version = "1.0.0-beta.3", features = ["from", "as_ref", "into", "deref"] }
 
 # crypto
-rand_chacha = "0.3"
-sha2 = "0.10"
-getrandom = { version = "0.2", features = ["js"] }
+rand_chacha = { version = "0.3", optional = true }
+sha2 = { version = "0.10", optional = true }
+getrandom = { version = "0.2", features = ["js"], optional = true }
 
 [dev-dependencies]
+selective-disclosure-jwt = { path = ".", features = ["issuer", "holder", "verifier"] }
 wasm-bindgen-test = "0.3.37"
+base64 = "0.21"
