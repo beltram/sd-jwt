@@ -12,6 +12,7 @@ thiserror = "1.0"
 # crypto
 rand_chacha = "0.3"
 sha2 = "0.10"
+getrandom = { version = "0.2", features = ["js"] }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.37"
