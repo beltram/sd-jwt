@@ -1,5 +1,5 @@
 [package]
-name = "sd-jwt"
+name = "selective-disclosure-jwt"
 version = "0.0.1"
 edition = "2021"
 description = "Selective Disclosure JWTs"
