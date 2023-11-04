@@ -7,8 +7,12 @@ pub enum CryptoError {
     RngError(#[from] rand_chacha::rand_core::Error),
     #[error("Lock is poisonned")]
     PoisonError,
-    #[error("Internal error: {0}")]
-    ImplementationError(&'static str),
     #[error("Salt size is below the recommended size (16)")]
     SaltTooSmall,
+    #[error("Invalid salt")]
+    InvalidSalt,
+    #[error(transparent)]
+    Base64Error(#[from] base64_simd::Error),
+    #[error("Internal error: {0}")]
+    ImplementationError(&'static str),
 }

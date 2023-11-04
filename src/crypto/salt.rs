@@ -20,7 +20,7 @@ pub const DEFAULT_SALT_SIZE: usize = 128 / 8;
 ///
 /// See also: Section [9.3](https://www.ietf.org/archive/id/draft-ietf-oauth-selective-disclosure-jwt-05.html#section-9.3)
 /// & [9.4](https://www.ietf.org/archive/id/draft-ietf-oauth-selective-disclosure-jwt-05.html#section-9.4)
-#[derive(Debug)]
+#[derive(Debug, Clone, Eq, PartialEq)] // TODO: ct eq
 pub struct Salt<const SIZE: usize = DEFAULT_SALT_SIZE>([u8; SIZE]);
 
 #[cfg(feature = "issuer")]
@@ -37,7 +37,7 @@ impl<const SIZE: usize> Salt<SIZE> {
 }
 
 #[cfg(feature = "issuer")]
-impl<const SIZE: usize> serde::Serialize for Salt<SIZE> {
+impl serde::Serialize for Salt {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -46,22 +46,19 @@ impl<const SIZE: usize> serde::Serialize for Salt<SIZE> {
     }
 }
 
-#[cfg(feature = "issuer")]
-impl<const SIZE: usize> ToString for Salt<SIZE> {
+impl ToString for Salt {
     fn to_string(&self) -> String {
         use base64ct::Encoding as _;
         base64ct::Base64UrlUnpadded::encode_string(&self.0)
     }
 }
 
-#[cfg(test)]
 impl<const SIZE: usize> std::str::FromStr for Salt<SIZE> {
     type Err = CryptoError;
 
     fn from_str(s: &str) -> CryptoResult<Self> {
-        use base64::Engine as _;
-        let bytes = base64::prelude::BASE64_URL_SAFE_NO_PAD.decode(s).unwrap();
-        let bytes = bytes.try_into().unwrap();
+        let bytes = base64_simd::URL_SAFE_NO_PAD.decode_to_vec(s)?;
+        let bytes = bytes.try_into().map_err(|_| CryptoError::InvalidSalt)?;
         Ok(Self(bytes))
     }
 }

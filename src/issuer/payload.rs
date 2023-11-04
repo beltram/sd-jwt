@@ -3,6 +3,7 @@ use crate::crypto::CryptoBackend;
 use crate::error::{SdjError, SdjResult};
 use crate::issuer::options::IssuerOptions;
 use crate::prelude::InputClaimSet;
+use serde_json::json;
 
 #[derive(serde::Serialize, serde::Deserialize, derive_more::Deref)]
 pub(super) struct JwtPayload(pub(super) serde_json::Value);
@@ -17,23 +18,13 @@ impl JwtPayload {
 
         let sd_alg = options.hash_alg.to_jwt_claim();
 
-        let disclosures_hashes = disclosures
-            .iter()
-            .map(Disclosure::hash)
-            .collect::<SdjResult<Vec<_>>>()?;
-
-        let mut payload = serde_json::json!({
-            "_sd": disclosures_hashes,
-            "_sd_alg": sd_alg,
-        });
-
-        let disclosed = input.input.as_object_mut().ok_or(SdjError::ImplementationError)?;
-        payload
+        input
+            .input
             .as_object_mut()
             .ok_or(SdjError::ImplementationError)?
-            .append(disclosed);
+            .insert("_sd_alg".to_string(), json!(sd_alg));
 
-        Ok((JwtPayload(payload), disclosures))
+        Ok((JwtPayload(input.input), disclosures))
     }
 }
 
@@ -85,7 +76,9 @@ pub mod tests {
         let input_claims = InputClaimSet::try_new(input, decisions).unwrap();
 
         let options = IssuerOptions::default();
-        let (payload, _) = JwtPayload::try_new(&mut CryptoBackend::new(), input_claims, &options).unwrap();
+        let (payload, disclosures) = JwtPayload::try_new(&mut CryptoBackend::new(), input_claims, &options).unwrap();
+
+        assert_eq!(disclosures.len(), decisions.len());
 
         // hash
         assert_eq!(payload.get("_sd_alg"), Some(&json!("sha-256")));
@@ -107,9 +100,9 @@ pub mod tests {
         }
 
         // verify disclosures hashes
-        let disclosures = payload.get("_sd").unwrap().as_array().unwrap();
-        assert_eq!(disclosures.len(), 8);
-        for d in disclosures {
+        let root_disclosures = payload.get("_sd").unwrap().as_array().unwrap();
+        assert_eq!(root_disclosures.len(), 8);
+        for d in root_disclosures {
             assert!(!d.as_str().unwrap().is_empty());
         }
     }
