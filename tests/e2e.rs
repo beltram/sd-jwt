@@ -1,6 +1,7 @@
+use jwt_simple::prelude::Ed25519KeyPair;
 use serde_json::json;
 
-use selective_disclosure_jwt::prelude::{Issuer, IssuerOptions};
+use selective_disclosure_jwt::prelude::{Holder, Issuer, IssuerOptions, JwsAlgorithm};
 
 #[test]
 fn e2e_test() {
@@ -8,7 +9,7 @@ fn e2e_test() {
 }
 
 fn e2e() -> Result<(), Box<dyn std::error::Error>> {
-    // Issuer
+    // === Issuer ===
     let id_token = json!({
         "sub": "user_42",
         "iss": "https://example.com/issuer",
@@ -42,16 +43,49 @@ fn e2e() -> Result<(), Box<dyn std::error::Error>> {
         "/address",
         "/birthdate",
         "/updated_at",
-        "/nationalities/1",
         "/nationalities/0",
+        "/nationalities/1",
     ];
     let mut issuer = Issuer::try_new()?;
-    let sdjwt = issuer.try_generate_sdjwt(id_token, decisions, IssuerOptions::default())?;
+    let sd_jwt = issuer.try_generate_sd_jwt(id_token, decisions, IssuerOptions::default())?;
 
-    let serialized_sdjwt = sdjwt.try_serialize()?;
-    println!("== Issued SD-JWT: {serialized_sdjwt}");
+    assert_eq!(sd_jwt.disclosures.len(), decisions.len());
 
-    // Holder
+    let jws = sd_jwt.jws.as_ref();
+    println!("== Issuer == Payload: https://jwt.io/#id_token={jws}\n");
+    println!("== Issuer == Disclosures:");
+
+    for disclosure in &sd_jwt.disclosures {
+        println!("    {disclosure}");
+    }
+
+    let serialized_sd_jwt = sd_jwt.try_serialize()?;
+    println!("== Issuer == SD-JWT: {serialized_sd_jwt}");
+
+    // === Holder ===
+    let disclose = &[
+        "/given_name",
+        "/family_name",
+        "/email",
+        "/nationalities/0",
+        "/nationalities/1",
+    ];
+    let issuer_kp = Ed25519KeyPair::from_pem(&issuer.get_signature_key())?;
+    let issuer_pk = issuer_kp.public_key().to_pem();
+
+    let holder_sd_jwt = Holder::select(&serialized_sd_jwt, disclose, JwsAlgorithm::Ed25519, &issuer_pk)?;
+    assert_eq!(holder_sd_jwt.disclosures.len(), disclose.len());
+
+    let jws = holder_sd_jwt.jws.as_ref();
+    println!("== Holder == Payload: https://jwt.io/#id_token={jws}\n");
+    println!("== Holder == Disclosures:");
+
+    for disclosure in &holder_sd_jwt.disclosures {
+        println!("    {disclosure}");
+    }
+
+    let serialized_sd_jwt = holder_sd_jwt.try_serialize()?;
+    println!("== Holder == SD-JWT: {serialized_sd_jwt}");
 
     Ok(())
 }

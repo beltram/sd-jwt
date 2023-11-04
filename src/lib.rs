@@ -20,8 +20,8 @@ pub(crate) trait ThirdParty {}
 pub mod prelude {
     #[cfg(any(feature = "issuer", feature = "holder", feature = "verifier"))]
     pub use crate::{
-        core::sdjwt::SDJwt,
-        crypto::hash::HashAlgorithm,
+        core::sd_jwt::SDJwt,
+        crypto::{hash::HashAlgorithm, sign::JwsAlgorithm},
         error::{SdjError, SdjResult},
     };
 
