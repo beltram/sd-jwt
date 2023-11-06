@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.4](https://github.com/beltram/sd-jwt/compare/v0.0.3...v0.0.4) - 2023-11-06
+
+### Added
+- implement naive holder
+
 ## [0.0.3](https://github.com/beltram/sd-jwt/compare/v0.0.2...v0.0.3) - 2023-11-04
 
 ### Added
