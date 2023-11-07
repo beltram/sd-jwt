@@ -1,7 +1,7 @@
 use jwt_simple::prelude::Ed25519KeyPair;
 use serde_json::json;
 
-use selective_disclosure_jwt::prelude::{Holder, Issuer, IssuerOptions, JwsAlgorithm};
+use selective_disclosure_jwt::prelude::{Holder, Issuer, IssuerOptions, JwsAlgorithm, Verifier};
 
 #[test]
 fn e2e_test() {
@@ -77,15 +77,18 @@ fn e2e() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(holder_sd_jwt.disclosures.len(), disclose.len());
 
     let jws = holder_sd_jwt.jws.as_ref();
-    println!("== Holder == Payload: https://jwt.io/#id_token={jws}\n");
+    println!("\n\n== Holder == Payload: https://jwt.io/#id_token={jws}\n");
     println!("== Holder == Disclosures:");
 
     for disclosure in &holder_sd_jwt.disclosures {
         println!("    {disclosure}");
     }
 
-    let serialized_sd_jwt = holder_sd_jwt.try_serialize()?;
-    println!("== Holder == SD-JWT: {serialized_sd_jwt}");
+    let serialized_holder_sd_jwt = holder_sd_jwt.try_serialize()?;
+    println!("== Holder == SD-JWT: {serialized_holder_sd_jwt}");
+
+    Verifier::verify(&serialized_holder_sd_jwt, &issuer_pk)?;
+    println!("\n\n== Verifier == ✅");
 
     Ok(())
 }

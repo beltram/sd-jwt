@@ -46,8 +46,6 @@ impl Issuer {
     }
 }
 
-impl crate::ThirdParty for Issuer {}
-
 // TODO: cleanup at some point
 impl Issuer {
     pub fn get_signature_key(&self) -> String {

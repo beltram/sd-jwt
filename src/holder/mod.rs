@@ -7,8 +7,6 @@ use serde_json::json;
 
 pub struct Holder;
 
-impl crate::ThirdParty for Holder {}
-
 impl Holder {
     // TODO: highly inefficient implementation ! To improve
     pub fn select(

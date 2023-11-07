@@ -10,7 +10,7 @@ license = "GPL-3.0-only"
 
 [features]
 # TODO: to facilitate dev in early phases, remove once mature enough
-default = ["issuer", "holder"]
+default = ["issuer", "holder", "verifier"]
 issuer = ["jwt-simple", "base64ct", "rand_chacha", "sha2", "getrandom"]
 holder = ["sha2", "jwt-simple", "base64ct"]
 verifier = ["jwt-simple", "sha2", "base64ct"]

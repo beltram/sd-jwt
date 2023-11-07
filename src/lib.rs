@@ -14,9 +14,6 @@ mod issuer;
 #[cfg(feature = "verifier")]
 mod verifier;
 
-/// Marker trait for all instances involved in the flow
-pub(crate) trait ThirdParty {}
-
 pub mod prelude {
     #[cfg(any(feature = "issuer", feature = "holder", feature = "verifier"))]
     pub use crate::{
