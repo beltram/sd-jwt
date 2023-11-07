@@ -11,9 +11,9 @@ pub struct InputClaimSet<'a> {
 }
 
 impl<'a> InputClaimSet<'a> {
-    pub fn try_new(input: serde_json::Value, decisions: &'a [&'a str]) -> SdjResult<Self> {
+    pub fn try_new(input: &serde_json::Value, decisions: &'a [&'a str]) -> SdjResult<Self> {
         let input = Self {
-            input,
+            input: input.clone(),
             decisions: Decisions(decisions.iter().map(|&p| p.try_into()).collect::<SdjResult<_>>()?),
         };
         input.validate()?;

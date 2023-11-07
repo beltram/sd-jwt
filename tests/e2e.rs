@@ -90,5 +90,9 @@ fn e2e() -> Result<(), Box<dyn std::error::Error>> {
     Verifier::verify(&serialized_holder_sd_jwt, &issuer_pk)?;
     println!("\n\n== Verifier == ✅");
 
+    let payload = Verifier::try_read_payload(&serialized_holder_sd_jwt, &issuer_pk)?;
+
+    assert_eq!(payload, id_token);
+
     Ok(())
 }

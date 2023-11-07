@@ -31,7 +31,7 @@ impl Issuer {
 
     pub fn try_generate_sd_jwt(
         &mut self,
-        input: serde_json::Value,
+        input: &serde_json::Value,
         decisions: &'static [&'static str],
         options: IssuerOptions,
     ) -> SdjResult<SDJwt> {
