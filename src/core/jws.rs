@@ -10,7 +10,7 @@ use serde_json::Value;
 pub struct Jws(String);
 
 impl Jws {
-    pub fn try_read_payload(&self, alg: JwsAlgorithm, verify_key: &str) -> SdjResult<JWTClaims<Value>> {
+    pub fn try_read_payload(&self, alg: JwsAlgorithm, verify_key: &str) -> SdjResult<Value> {
         // TODO:
         let verification_options = None;
         match alg {
@@ -25,5 +25,12 @@ impl Jws {
             }
         }
         .map_err(|_| SdjError::InvalidJwt)
+    }
+
+    /// Given wrapper struct ([JWTClaims]) which contains some standard JWT claims
+    /// extract them from here to give a simple flat [Value] and have a loosely coupled API
+    /// (not depending on [jwt_simple])
+    fn unfold_claims(claims: JWTClaims<Value>) -> Value {
+        claims.custom
     }
 }

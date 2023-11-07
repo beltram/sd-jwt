@@ -47,7 +47,7 @@ fn e2e() -> Result<(), Box<dyn std::error::Error>> {
         "/nationalities/1",
     ];
     let mut issuer = Issuer::try_new()?;
-    let sd_jwt = issuer.try_generate_sd_jwt(id_token, decisions, IssuerOptions::default())?;
+    let sd_jwt = issuer.try_generate_sd_jwt(&id_token, decisions, IssuerOptions::default())?;
 
     assert_eq!(sd_jwt.disclosures.len(), decisions.len());
 

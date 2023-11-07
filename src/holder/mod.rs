@@ -22,7 +22,6 @@ impl Holder {
             .collect::<SdjResult<Vec<_>>>()?;
 
         let payload = sd_jwt.jws.try_read_payload(alg, issuer_verifying_key)?;
-        let payload = json!(payload);
 
         let mut selected_disclosures = vec![];
 
