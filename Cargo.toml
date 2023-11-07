@@ -36,3 +36,7 @@ getrandom = { version = "0.2", features = ["js"], optional = true }
 [dev-dependencies]
 selective-disclosure-jwt = { path = ".", features = ["issuer", "holder", "verifier"] }
 wasm-bindgen-test = "0.3.37"
+yaml-include = "0.7.0"
+strum = { version = "0.25", features = ["derive"] }
+serde_yaml = "0.9"
+serde = "1.0"

@@ -48,7 +48,7 @@ pub mod tests {
             "a": 1,
             "b": 2
         });
-        let mut ics = InputClaimSet::try_new(input, &["/a"]).unwrap();
+        let mut ics = InputClaimSet::try_new(&input, &["/a"]).unwrap();
         let disclosures = ics.try_select_disclosures(&mut CryptoBackend::new()).unwrap();
         assert_eq!(disclosures.len(), 1);
         let Disclosure::Object { name, value, .. } = disclosures.get(0).unwrap() else {

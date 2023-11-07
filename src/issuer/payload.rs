@@ -73,7 +73,7 @@ pub mod tests {
             "/nationalities/1",
             "/nationalities/0",
         ];
-        let input_claims = InputClaimSet::try_new(input, decisions).unwrap();
+        let input_claims = InputClaimSet::try_new(&input, decisions).unwrap();
 
         let options = IssuerOptions::default();
         let (payload, disclosures) = JwtPayload::try_new(&mut CryptoBackend::new(), input_claims, &options).unwrap();

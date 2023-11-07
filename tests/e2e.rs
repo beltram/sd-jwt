@@ -1,3 +1,5 @@
+mod test_vectors;
+
 use jwt_simple::prelude::Ed25519KeyPair;
 use serde_json::json;
 
@@ -9,6 +11,8 @@ fn e2e_test() {
 }
 
 fn e2e() -> Result<(), Box<dyn std::error::Error>> {
+    let alg = JwsAlgorithm::Ed25519;
+
     // === Issuer ===
     let id_token = json!({
         "sub": "user_42",
@@ -73,7 +77,7 @@ fn e2e() -> Result<(), Box<dyn std::error::Error>> {
     let issuer_kp = Ed25519KeyPair::from_pem(&issuer.get_signature_key())?;
     let issuer_pk = issuer_kp.public_key().to_pem();
 
-    let holder_sd_jwt = Holder::select(&serialized_sd_jwt, disclose, JwsAlgorithm::Ed25519, &issuer_pk)?;
+    let holder_sd_jwt = Holder::select(&serialized_sd_jwt, disclose, alg, &issuer_pk)?;
     assert_eq!(holder_sd_jwt.disclosures.len(), disclose.len());
 
     let jws = holder_sd_jwt.jws.as_ref();
@@ -87,10 +91,10 @@ fn e2e() -> Result<(), Box<dyn std::error::Error>> {
     let serialized_holder_sd_jwt = holder_sd_jwt.try_serialize()?;
     println!("== Holder == SD-JWT: {serialized_holder_sd_jwt}");
 
-    Verifier::verify(&serialized_holder_sd_jwt, &issuer_pk)?;
+    Verifier::verify(&serialized_holder_sd_jwt, alg, &issuer_pk)?;
     println!("\n\n== Verifier == ✅");
 
-    let payload = Verifier::try_read_payload(&serialized_holder_sd_jwt, &issuer_pk)?;
+    let payload = Verifier::try_read_payload(&serialized_holder_sd_jwt, alg, &issuer_pk)?;
 
     assert_eq!(payload, id_token);
 

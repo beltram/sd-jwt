@@ -13,7 +13,7 @@ impl Jws {
     pub fn try_read_payload(&self, alg: JwsAlgorithm, verify_key: &str) -> SdjResult<Value> {
         // TODO:
         let verification_options = None;
-        match alg {
+        let claims = match alg {
             JwsAlgorithm::Ed25519 => {
                 Ed25519PublicKey::from_pem(verify_key)?.verify_token::<Value>(self, verification_options)
             }
@@ -24,7 +24,8 @@ impl Jws {
                 ES384PublicKey::from_pem(verify_key)?.verify_token::<Value>(self, verification_options)
             }
         }
-        .map_err(|_| SdjError::InvalidJwt)
+        .map_err(|_| SdjError::InvalidJwt)?;
+        Ok(Self::unfold_claims(claims))
     }
 
     /// Given wrapper struct ([JWTClaims]) which contains some standard JWT claims
