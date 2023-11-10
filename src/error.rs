@@ -8,6 +8,8 @@ pub enum SdjError {
     #[error(transparent)]
     JsonError(#[from] serde_json::Error),
     #[error(transparent)]
+    YamlError(#[from] serde_yaml::Error),
+    #[error(transparent)]
     Base64Error(#[from] base64_simd::Error),
     #[error(transparent)]
     JwtError(#[from] jwt_simple::Error),

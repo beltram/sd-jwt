@@ -3,7 +3,6 @@ use crate::core::json_pointer::path::JsonPointerPath;
 use crate::core::json_pointer::JsonPointer;
 use crate::error::{SdjError, SdjResult};
 use crate::prelude::{JwsAlgorithm, SDJwt};
-use serde_json::json;
 
 pub struct Holder;
 

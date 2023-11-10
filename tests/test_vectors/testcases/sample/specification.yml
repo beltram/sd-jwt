@@ -1,0 +1,17 @@
+#user_claims:
+#  # Make all elements SD
+#  is_over:
+#    !sd "key": True
+
+user_claims:
+  data_types:
+    - !sd "foo"
+
+holder_disclosed_claims:
+  is_over:
+    "key": False
+
+expect_verified_user_claims:
+  is_over:
+    "18": False
+    

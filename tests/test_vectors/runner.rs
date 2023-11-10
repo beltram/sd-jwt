@@ -1,11 +1,16 @@
+use selective_disclosure_jwt::prelude::{Issuer, IssuerOptions};
 use std::error::Error;
 use std::path::PathBuf;
 use strum::Display;
 
 #[derive(Display, Debug)]
 pub enum Tests {
+    #[strum(serialize = "sample")]
+    Sample,
     #[strum(serialize = "array_full_sd")]
     ArrayFullSd,
+    #[strum(serialize = "array_data_types")]
+    ArrayDataTypes,
 }
 
 pub const FILES: [&str; 9] = [
@@ -32,13 +37,17 @@ pub struct TestRunner;
 impl TestRunner {
     pub fn run(test: Tests) -> Result<(), Box<dyn Error>> {
         let path = format!("tests/test_vectors/testcases/{test}/specification.yml");
-        // let file = std::fs::read(path)?;
-        let path = PathBuf::from(path);
-        let value = yaml_include::Transformer::new(path.clone(), false).unwrap().parse();
+        let file = std::fs::File::open(&PathBuf::from(path)).unwrap();
 
-        println!("{:#?}", value);
+        let Specification {
+            user_claims,
+            holder_disclosed_claims,
+            expect_verified_user_claims,
+        } = serde_yaml::from_reader::<_, Specification>(&file).unwrap();
 
-        serde_yaml::from_reader::<_, Specification>(&std::fs::File::open(&path).unwrap()).unwrap();
+        let mut issuer = Issuer::try_new()?;
+
+        issuer.try_generate_sd_jwt_yaml(&user_claims.into(), IssuerOptions::default())?;
 
         Ok(())
     }

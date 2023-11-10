@@ -3,6 +3,7 @@ use crate::test_vectors::runner::{TestRunner, Tests};
 pub mod runner;
 
 #[test]
-fn array_full_sd() {
-    TestRunner::run(Tests::ArrayFullSd).unwrap();
+fn sample() {
+    TestRunner::run(Tests::Sample).unwrap();
+    // TestRunner::run(Tests::ArrayDataTypes).unwrap();
 }

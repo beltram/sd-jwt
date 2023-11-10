@@ -1,3 +1,4 @@
+use crate::issuer::select::SelectDisclosures;
 use crate::{
     core::jws::Jws,
     crypto::CryptoBackend,
@@ -15,6 +16,10 @@ mod jws;
 pub mod options;
 mod payload;
 mod sd_jwt;
+mod select;
+
+#[derive(Debug, Clone, derive_more::AsRef, derive_more::Deref, derive_more::From, derive_more::Into)]
+pub struct UserInput(serde_yaml::Value);
 
 pub struct Issuer {
     pub(crate) backend: CryptoBackend,
@@ -43,6 +48,11 @@ impl Issuer {
             disclosures,
             key_binding: None,
         })
+    }
+
+    pub fn try_generate_sd_jwt_yaml(&mut self, input: &UserInput, options: IssuerOptions) -> SdjResult<SDJwt> {
+        let payload = input.clone().0.try_select_items(&mut self.backend, &options)?;
+        todo!()
     }
 }
 
