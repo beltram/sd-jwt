@@ -1,4 +1,5 @@
 use std::ops::DerefMut;
+use std::process::Termination;
 
 use serde_json::{json, Value as JsonValue};
 use serde_yaml::{Mapping, Value as YamlValue, Value};
@@ -9,21 +10,35 @@ use crate::error::SdjResult;
 use crate::prelude::IssuerOptions;
 
 pub trait SelectDisclosures {
-    fn try_select_items(self, backend: &mut CryptoBackend, options: &IssuerOptions) -> SdjResult<JsonValue>;
+    fn try_select_items(
+        self,
+        backend: &mut CryptoBackend,
+        options: &IssuerOptions,
+    ) -> SdjResult<(JsonValue, Vec<Disclosure>)>;
 
-    fn try_apply_disclosures(&mut self, backend: &mut CryptoBackend, options: &IssuerOptions) -> SdjResult<()>;
+    fn try_apply_disclosures(
+        &mut self,
+        backend: &mut CryptoBackend,
+        options: &IssuerOptions,
+    ) -> SdjResult<Vec<Disclosure>>;
 }
 
 impl SelectDisclosures for YamlValue {
-    fn try_select_items(mut self, backend: &mut CryptoBackend, options: &IssuerOptions) -> SdjResult<JsonValue> {
-        self.try_apply_disclosures(backend, options)?;
-        // println!("=== {self:#?}");
+    fn try_select_items(
+        mut self,
+        backend: &mut CryptoBackend,
+        options: &IssuerOptions,
+    ) -> SdjResult<(JsonValue, Vec<Disclosure>)> {
+        let disclosures = self.try_apply_disclosures(backend, options)?;
         let json = serde_yaml::from_value::<JsonValue>(self)?;
-        println!("=== {json:#?}");
-        Ok(json)
+        Ok((json, disclosures))
     }
 
-    fn try_apply_disclosures(&mut self, backend: &mut CryptoBackend, options: &IssuerOptions) -> SdjResult<()> {
+    fn try_apply_disclosures(
+        &mut self,
+        backend: &mut CryptoBackend,
+        options: &IssuerOptions,
+    ) -> SdjResult<Vec<Disclosure>> {
         let mut disclosures = vec![];
 
         match self {
@@ -38,7 +53,9 @@ impl SelectDisclosures for YamlValue {
                             return false;
                         }
                         (_, YamlValue::Mapping(_) | YamlValue::Sequence(_)) => {
-                            v.try_apply_disclosures(backend, options).unwrap()
+                            disclosures
+                                .append(&mut v.try_apply_disclosures(backend, options).unwrap())
+                                .report();
                         }
                         (_, _) => {}
                     }
@@ -58,7 +75,6 @@ impl SelectDisclosures for YamlValue {
                 for item in array.iter_mut() {
                     match &item {
                         Value::Tagged(tagged) if tagged.tag == "!sd" => {
-                            println!(">> {:?}", tagged.value);
                             let json_value = serde_yaml::from_value::<JsonValue>(tagged.value.clone()).unwrap();
                             let disclosure = Disclosure::try_new_array(backend, json_value).unwrap();
                             let hash = disclosure.hash().unwrap();
@@ -71,7 +87,9 @@ impl SelectDisclosures for YamlValue {
                             *item = YamlValue::Mapping(Mapping::from_iter([(k, v)]));
                             disclosures.push(disclosure);
                         }
-                        Value::Mapping(_) | Value::Sequence(_) => item.try_apply_disclosures(backend, options).unwrap(),
+                        Value::Mapping(_) | Value::Sequence(_) => {
+                            disclosures.append(&mut item.try_apply_disclosures(backend, options).unwrap())
+                        }
                         _ => {}
                     }
                 }
@@ -79,6 +97,6 @@ impl SelectDisclosures for YamlValue {
             _ => {}
         };
 
-        Ok(())
+        Ok(disclosures)
     }
 }

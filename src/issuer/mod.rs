@@ -51,8 +51,13 @@ impl Issuer {
     }
 
     pub fn try_generate_sd_jwt_yaml(&mut self, input: &UserInput, options: IssuerOptions) -> SdjResult<SDJwt> {
-        let payload = input.clone().0.try_select_items(&mut self.backend, &options)?;
-        todo!()
+        let (payload, disclosures) = input.clone().0.try_select_items(&mut self.backend, &options)?;
+        let jws = Jws::try_new(JwtPayload(payload), options.sign_alg, &self.signature_key)?;
+        Ok(SDJwt {
+            jws,
+            disclosures,
+            key_binding: None,
+        })
     }
 }
 
