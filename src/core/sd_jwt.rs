@@ -19,7 +19,7 @@ pub struct SDJwt {
 }
 
 impl SDJwt {
-    pub const DELIMITER: &str = "~";
+    pub const DELIMITER: &'static str = "~";
 }
 
 impl FromStr for SDJwt {

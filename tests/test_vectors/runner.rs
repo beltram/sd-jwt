@@ -47,7 +47,9 @@ impl TestRunner {
 
         let mut issuer = Issuer::try_new()?;
 
-        issuer.try_generate_sd_jwt_yaml(&user_claims.into(), IssuerOptions::default())?;
+        let sd_jwt = issuer.try_generate_sd_jwt_yaml(&user_claims.into(), IssuerOptions::default())?;
+
+        println!("{:?}", sd_jwt.jws.to_string());
 
         Ok(())
     }
