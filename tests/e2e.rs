@@ -77,7 +77,7 @@ fn e2e() -> Result<(), Box<dyn std::error::Error>> {
     let issuer_kp = Ed25519KeyPair::from_pem(&issuer.get_signature_key())?;
     let issuer_pk = issuer_kp.public_key().to_pem();
 
-    let holder_sd_jwt = Holder::select(&serialized_sd_jwt, disclose, alg, &issuer_pk)?;
+    let holder_sd_jwt = Holder::try_select(&serialized_sd_jwt, disclose, alg, &issuer_pk)?;
     assert_eq!(holder_sd_jwt.disclosures.len(), disclose.len());
 
     let jws = holder_sd_jwt.jws.as_ref();

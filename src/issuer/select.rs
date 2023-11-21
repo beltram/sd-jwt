@@ -4,10 +4,7 @@ use std::process::Termination;
 use serde_json::{json, Value as JsonValue};
 use serde_yaml::{Mapping, Value as YamlValue, Value};
 
-use crate::core::disclosure::Disclosure;
-use crate::crypto::CryptoBackend;
-use crate::error::SdjResult;
-use crate::prelude::IssuerOptions;
+use crate::{core::disclosure::Disclosure, crypto::CryptoBackend, error::SdjResult, prelude::IssuerOptions};
 
 pub trait SelectDisclosures {
     fn try_select_items(

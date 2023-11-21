@@ -21,7 +21,7 @@ pub const DEFAULT_SALT_SIZE: usize = 128 / 8;
 /// See also: Section [9.3](https://www.ietf.org/archive/id/draft-ietf-oauth-selective-disclosure-jwt-05.html#section-9.3)
 /// & [9.4](https://www.ietf.org/archive/id/draft-ietf-oauth-selective-disclosure-jwt-05.html#section-9.4)
 #[derive(Debug, Clone, Eq, PartialEq)] // TODO: ct eq
-pub struct Salt<const SIZE: usize = DEFAULT_SALT_SIZE>([u8; SIZE]);
+pub struct Salt<const SIZE: usize = DEFAULT_SALT_SIZE>(pub(super) [u8; SIZE]);
 
 #[cfg(feature = "issuer")]
 impl<const SIZE: usize> Salt<SIZE> {

@@ -1,6 +1,8 @@
 use crate::test_vectors::runner::{TestRunner, Tests};
 
 pub mod runner;
+pub mod sd_jwt_issuance;
+pub mod specification;
 
 #[test]
 fn sample() {

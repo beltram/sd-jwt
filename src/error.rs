@@ -25,6 +25,8 @@ pub enum SdjError {
     UnknownDisclosure,
     #[error("Invalid Disclosure")]
     InvalidDisclosure,
+    #[error("Invalid Holder selection")]
+    InvalidHolderSelection,
     #[error("Unexpected internal error")]
     ImplementationError,
 }

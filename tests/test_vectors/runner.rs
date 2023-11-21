@@ -1,7 +1,11 @@
-use selective_disclosure_jwt::prelude::{Issuer, IssuerOptions};
 use std::error::Error;
-use std::path::PathBuf;
+
 use strum::Display;
+
+use selective_disclosure_jwt::prelude::{Issuer, IssuerOptions, JwsAlgorithm};
+
+use crate::test_vectors::sd_jwt_issuance::SdJwtIssuance;
+use crate::test_vectors::specification::Specification;
 
 #[derive(Display, Debug)]
 pub enum Tests {
@@ -25,31 +29,33 @@ pub const FILES: [&str; 9] = [
     "verified_contents.json",
 ];
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
-pub struct Specification {
-    user_claims: serde_yaml::Value,
-    holder_disclosed_claims: serde_yaml::Value,
-    expect_verified_user_claims: serde_yaml::Value,
-}
-
 pub struct TestRunner;
 
 impl TestRunner {
+    const JWS_ALG: JwsAlgorithm = JwsAlgorithm::Ed25519;
+    const BASE: &'static str = "tests/test_vectors/testcases";
+
     pub fn run(test: Tests) -> Result<(), Box<dyn Error>> {
-        let path = format!("tests/test_vectors/testcases/{test}/specification.yml");
-        let file = std::fs::File::open(&PathBuf::from(path)).unwrap();
+        println!("\n=== Running {test} ===\n");
 
-        let Specification {
-            user_claims,
-            holder_disclosed_claims,
-            expect_verified_user_claims,
-        } = serde_yaml::from_reader::<_, Specification>(&file).unwrap();
+        let base_path = format!("{}/{test}", Self::BASE);
 
+        let specification = Specification::from(base_path.as_str());
+
+        // === Issuer ===
         let mut issuer = Issuer::try_new()?;
+        let sd_jwt = issuer.try_generate_sd_jwt_yaml(&specification.user_claims.into(), IssuerOptions::default())?;
 
-        let sd_jwt = issuer.try_generate_sd_jwt_yaml(&user_claims.into(), IssuerOptions::default())?;
+        SdJwtIssuance::from(base_path.as_str()).verify(base_path.as_str(), &sd_jwt);
 
-        println!("{:?}", sd_jwt.jws.to_string());
+        // === Holder ===
+
+        /*let holder_sd_jwt = Holder::try_select_yaml(
+            sd_jwt.try_serialize()?.as_str(),
+            &specification.holder_disclosed_claims,
+            JWS_ALG,
+            &issuer.get_signature_key(),
+        )?;*/
 
         Ok(())
     }
