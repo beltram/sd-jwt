@@ -28,24 +28,16 @@ impl Disclosure<sha2::Sha256, 16> {
     }
 
     pub fn encode(&self) -> SdjResult<String> {
-        let utf8_encoded = match self {
-            Disclosure::Object { salt, name, value, .. } => {
-                let salt = salt.to_string();
+        let mut buf = vec![];
+        let python_fmt = serde_json_python_formatter::PythonFormatter::default();
+        let mut serializer = serde_json::Serializer::with_formatter(&mut buf, python_fmt);
 
-                let mut buf = vec![];
-                let python_fmt = serde_json_python_formatter::PythonFormatter::default();
-                let mut serializer = serde_json::Serializer::with_formatter(&mut buf, python_fmt);
-                value.serialize(&mut serializer).unwrap();
-                let value = String::from_utf8(buf).unwrap();
-
-                format!("[\"{salt}\", \"{name}\", {value}]")
-            }
-            Disclosure::Array { salt, value, .. } => {
-                let salt = salt.to_string();
-                let value = serde_json::to_string(&value)?;
-                format!("[\"{salt}\", {value}]")
-            }
-        };
+        match self {
+            Disclosure::Object { salt, name, value, .. } => json!([salt, name, value]),
+            Disclosure::Array { salt, value, .. } => json!([salt, value]),
+        }
+        .serialize(&mut serializer)?;
+        let utf8_encoded = String::from_utf8(buf)?;
 
         // this encoding might be vulnerable to side-channel attacks revealing the content being
         // encoded which should not be leaked
