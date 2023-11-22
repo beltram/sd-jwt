@@ -1,4 +1,6 @@
 use crate::{core::disclosure::Disclosure, error::SdjResult};
+use serde::Serialize;
+use serde_json::json;
 
 /// A hashed (by [crate::prelude::Issuer]) [Disclosure] to be verified
 /// by a [crate::prelude::Verifier]
@@ -18,19 +20,28 @@ impl Disclosure<sha2::Sha256, 16> {
         // let mut hasher = Hash::new();
         use sha2::Digest;
         let mut hasher = sha2::Sha256::new();
-        let input = self.build()?;
+        let input = self.encode()?;
         hasher.update(input.as_bytes());
         let hashed = hasher.finalize();
         let b64_encoded = base64_simd::URL_SAFE_NO_PAD.encode_to_string(hashed.as_slice());
         Ok(b64_encoded.into())
     }
 
-    pub fn build(&self) -> SdjResult<String> {
+    pub fn encode(&self) -> SdjResult<String> {
         let utf8_encoded = match self {
             Disclosure::Object { salt, name, value, .. } => {
                 let salt = salt.to_string();
-                let value = serde_json::to_string(&value)?;
-                format!("[\"{salt}\", \"{name}\", {value}]")
+                // let value = serde_json::to_string(&value)?;
+
+                let mut buf = vec![];
+                let python_fmt = serde_json_python_formatter::PythonFormatter::default();
+                let mut serializer = serde_json::Serializer::with_formatter(&mut buf, python_fmt);
+                value.serialize(&mut serializer).unwrap();
+                let value = String::from_utf8(buf).unwrap();
+
+                let r = format!("[\"{salt}\", \"{name}\", {value}]");
+                // println!("===> {value} -> {r}");
+                r
             }
             Disclosure::Array { salt, value, .. } => {
                 let salt = salt.to_string();

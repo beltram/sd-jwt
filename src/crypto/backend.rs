@@ -39,12 +39,8 @@ impl<const SALT_SIZE: usize> CryptoBackend<SALT_SIZE> {
         Self { rng }
     }
 
-    pub fn new_salt(&mut self) -> CryptoResult<Salt<SALT_SIZE>> {
-        self.new_python_salt()
-    }
-
     /// In order to test against the reference implementation test vectors written in Python
-    fn new_python_salt(&mut self) -> CryptoResult<Salt<SALT_SIZE>> {
+    pub fn new_salt(&mut self) -> CryptoResult<Salt<SALT_SIZE>> {
         let mut salt = [0u8; SALT_SIZE];
         for (i, _) in (0..SALT_SIZE).enumerate() {
             let r: u8 = self.rng.getrandbits(8).try_into().unwrap();

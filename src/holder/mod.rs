@@ -1,11 +1,10 @@
-use crate::core::disclosure::Disclosure;
-use crate::core::json_pointer::path::JsonPointerPath;
-use crate::core::json_pointer::JsonPointer;
-use crate::error::{SdjError, SdjResult};
-use crate::issuer::UserInput;
-use crate::prelude::{JwsAlgorithm, SDJwt};
 use serde_json::Value as JsonValue;
 use serde_yaml::Value as YamlValue;
+
+use crate::{
+    core::{disclosure::Disclosure, json_pointer::path::JsonPointerPath, json_pointer::JsonPointer},
+    prelude::{JwsAlgorithm, SDJwt, SdjError, SdjResult},
+};
 
 pub struct Holder;
 

@@ -159,7 +159,7 @@ pub mod tests {
             hasher: core::marker::PhantomData::<sha2::Sha256>,
         };
         assert_eq!(
-            disclosure.build().unwrap(),
+            disclosure.encode().unwrap(),
             "WyJsa2x4RjVqTVlsR1RQVW92TU5JdkNBIiwgIkZSIl0".to_string()
         );
     }
