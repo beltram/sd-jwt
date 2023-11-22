@@ -25,6 +25,8 @@ pub enum SdjError {
     UnknownDisclosure,
     #[error("Invalid Disclosure")]
     InvalidDisclosure,
+    #[error(transparent)]
+    Utf8Error(#[from] std::string::FromUtf8Error),
     #[error("Invalid Holder selection")]
     InvalidHolderSelection,
     #[error("Unexpected internal error")]

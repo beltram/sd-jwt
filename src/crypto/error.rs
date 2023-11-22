@@ -5,7 +5,7 @@ pub enum CryptoError {
     #[cfg(feature = "issuer")]
     #[error(transparent)]
     RngError(#[from] rand_chacha::rand_core::Error),
-    #[error("Lock is poisonned")]
+    #[error("Lock is poisoned")]
     PoisonError,
     #[error("Salt size is below the recommended size (16)")]
     SaltTooSmall,

@@ -31,7 +31,6 @@ impl Disclosure<sha2::Sha256, 16> {
         let utf8_encoded = match self {
             Disclosure::Object { salt, name, value, .. } => {
                 let salt = salt.to_string();
-                // let value = serde_json::to_string(&value)?;
 
                 let mut buf = vec![];
                 let python_fmt = serde_json_python_formatter::PythonFormatter::default();
@@ -39,9 +38,7 @@ impl Disclosure<sha2::Sha256, 16> {
                 value.serialize(&mut serializer).unwrap();
                 let value = String::from_utf8(buf).unwrap();
 
-                let r = format!("[\"{salt}\", \"{name}\", {value}]");
-                // println!("===> {value} -> {r}");
-                r
+                format!("[\"{salt}\", \"{name}\", {value}]")
             }
             Disclosure::Array { salt, value, .. } => {
                 let salt = salt.to_string();
