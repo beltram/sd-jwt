@@ -1,5 +1,4 @@
 use selective_disclosure_jwt::prelude::SDJwt;
-use std::error::Error;
 
 /// Test struct to map the `sd_jwt_issuance.json` file in e2e tests and compare it
 /// to a SD-JWT without making a mess there
@@ -16,15 +15,18 @@ impl SdJwtIssuance {
 
     pub fn verify(&self, base_path: &str, sd_jwt: &SDJwt) {
         // === Disclosures ===
-        println!("{:#?}", self.disclosures);
         for actual in sd_jwt.disclosures.iter() {
             let actual = actual.hash().unwrap().to_string();
             assert!(
                 self.disclosures.contains(&actual),
-                "Could not find {actual} in {}",
+                "Could not find disclosure {actual} in {}",
                 Self::path(base_path)
             );
         }
+        // === Jws ===
+        let (header, payload, signature) = sd_jwt.jws.to_parts();
+        assert_eq!(payload, self.payload, "SD-JWT payload did not match");
+        assert_eq!(signature, self.signature, "SD-JWT signature did not match");
     }
 
     fn path(base_path: &str) -> String {

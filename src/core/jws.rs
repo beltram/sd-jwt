@@ -1,5 +1,4 @@
-use crate::error::SdjError;
-use crate::prelude::{JwsAlgorithm, SdjResult};
+use crate::prelude::{JwsAlgorithm, SdjError, SdjResult};
 use jwt_simple::prelude::{
     ECDSAP256PublicKeyLike, ECDSAP384PublicKeyLike, ES256PublicKey, ES384PublicKey, Ed25519PublicKey,
     EdDSAPublicKeyLike, JWTClaims,
@@ -33,5 +32,12 @@ impl Jws {
     /// (not depending on [jwt_simple])
     fn unfold_claims(claims: JWTClaims<Value>) -> Value {
         claims.custom
+    }
+
+    #[cfg(any(test, feature = "e2e-test"))]
+    pub fn to_parts(&self) -> (&str, &str, &str) {
+        let parts: [&str; 3] = self.split('.').collect::<Vec<_>>().try_into().unwrap();
+        let [header, payload, signature] = parts;
+        (header, payload, signature)
     }
 }
