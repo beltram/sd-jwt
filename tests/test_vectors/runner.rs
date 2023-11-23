@@ -1,11 +1,11 @@
+use jwt_simple::prelude::*;
 use std::error::Error;
 
 use strum::Display;
 
 use selective_disclosure_jwt::prelude::{Issuer, IssuerOptions, JwsAlgorithm};
 
-use crate::test_vectors::sd_jwt_issuance::SdJwtIssuance;
-use crate::test_vectors::specification::Specification;
+use crate::test_vectors::{sd_jwt_issuance::SdJwtIssuance, specification::Specification};
 
 #[derive(Display, Debug)]
 pub enum Tests {
@@ -32,7 +32,7 @@ pub const FILES: [&str; 9] = [
 pub struct TestRunner;
 
 impl TestRunner {
-    const JWS_ALG: JwsAlgorithm = JwsAlgorithm::Ed25519;
+    const JWS_ALG: JwsAlgorithm = JwsAlgorithm::P256;
     const BASE: &'static str = "tests/test_vectors/testcases";
 
     pub fn run(test: Tests) -> Result<(), Box<dyn Error>> {
@@ -42,9 +42,19 @@ impl TestRunner {
 
         let specification = Specification::from(base_path.as_str());
 
+        let signature_key = match Self::JWS_ALG {
+            JwsAlgorithm::Ed25519 => Ed25519KeyPair::generate().to_pem(),
+            JwsAlgorithm::P256 => ES256KeyPair::generate().to_pem().unwrap(),
+            JwsAlgorithm::P384 => ES384KeyPair::generate().to_pem().unwrap(),
+        };
+
         // === Issuer ===
-        let mut issuer = Issuer::try_new()?;
-        let sd_jwt = issuer.try_generate_sd_jwt_yaml(&specification.user_claims.into(), IssuerOptions::default())?;
+        let mut issuer = Issuer::try_new(signature_key)?;
+        let issuer_options = IssuerOptions {
+            sign_alg: Self::JWS_ALG,
+            ..Default::default()
+        };
+        let sd_jwt = issuer.try_generate_sd_jwt_yaml(&specification.user_claims.into(), issuer_options)?;
 
         SdJwtIssuance::from(base_path.as_str()).verify(base_path.as_str(), &sd_jwt);
 

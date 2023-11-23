@@ -23,3 +23,14 @@ pub enum JwsAlgorithm {
     /// [1]: https://tools.ietf.org/html/rfc7518#section-3.4
     P384,
 }
+
+impl ToString for JwsAlgorithm {
+    fn to_string(&self) -> String {
+        match self {
+            JwsAlgorithm::P256 => "ES256",
+            JwsAlgorithm::P384 => "ES384",
+            JwsAlgorithm::Ed25519 => "EdDSA",
+        }
+        .to_string()
+    }
+}

@@ -15,20 +15,8 @@ impl SdJwtIssuance {
 
     pub fn verify(&self, base_path: &str, sd_jwt: &SDJwt) {
         // === Disclosures ===
-        // println!("{:#?}", self.disclosures);
-
-        /*for d in &self.disclosures {
-            let decoded = base64_simd::URL_SAFE_NO_PAD.decode_to_vec(&d).unwrap();
-            let decoded = std::str::from_utf8(&decoded).unwrap();
-            println!("python -> {decoded} => {d}");
-        }*/
-
         for actual in sd_jwt.disclosures.iter() {
             let actual = actual.encode().unwrap();
-
-            // let decoded = base64_simd::URL_SAFE_NO_PAD.decode_to_vec(&actual).unwrap();
-            // let decoded = std::str::from_utf8(&decoded).unwrap();
-            // println!("rust   => {decoded} => {actual}");
             assert!(
                 self.disclosures.contains(&actual),
                 "Could not find disclosure {actual} in {}",
@@ -37,6 +25,7 @@ impl SdJwtIssuance {
         }
         // === Jws ===
         let (header, payload, signature) = sd_jwt.jws.to_parts();
+        assert_eq!(header, self.protected, "SD-JWT header did not match");
         // assert_eq!(payload, self.payload, "SD-JWT payload did not match");
         // assert_eq!(signature, self.signature, "SD-JWT signature did not match");
     }

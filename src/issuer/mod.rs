@@ -27,10 +27,9 @@ pub struct Issuer {
 }
 
 impl Issuer {
-    pub fn try_new() -> SdjResult<Self> {
+    // TODO: have a generic wrapper over keys, this sucks
+    pub fn try_new(signature_key: String) -> SdjResult<Self> {
         let backend = CryptoBackend::new();
-        // TODO: obviously move this to constructor
-        let signature_key = Ed25519KeyPair::generate().to_pem();
         Ok(Self { backend, signature_key })
     }
 

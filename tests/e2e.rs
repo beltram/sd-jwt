@@ -1,6 +1,6 @@
 mod test_vectors;
 
-use jwt_simple::prelude::Ed25519KeyPair;
+use jwt_simple::prelude::*;
 use serde_json::json;
 
 use selective_disclosure_jwt::prelude::{Holder, Issuer, IssuerOptions, JwsAlgorithm, Verifier};
@@ -50,7 +50,14 @@ fn e2e() -> Result<(), Box<dyn std::error::Error>> {
         "/nationalities/0",
         "/nationalities/1",
     ];
-    let mut issuer = Issuer::try_new()?;
+
+    let signature_key = match alg {
+        JwsAlgorithm::Ed25519 => Ed25519KeyPair::generate().to_pem(),
+        JwsAlgorithm::P256 => ES256KeyPair::generate().to_pem().unwrap(),
+        JwsAlgorithm::P384 => ES384KeyPair::generate().to_pem().unwrap(),
+    };
+
+    let mut issuer = Issuer::try_new(signature_key)?;
     let sd_jwt = issuer.try_generate_sd_jwt(&id_token, decisions, IssuerOptions::default())?;
 
     assert_eq!(sd_jwt.disclosures.len(), decisions.len());
