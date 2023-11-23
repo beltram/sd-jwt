@@ -7,7 +7,6 @@ use crate::{
     prelude::SDJwt,
 };
 use input::InputClaimSet;
-use jwt_simple::prelude::Ed25519KeyPair;
 
 mod decisions;
 mod disclosure;
@@ -69,3 +68,19 @@ impl Issuer {
 
 #[cfg(test)]
 pub mod tests {}
+
+#[test]
+fn toto() {
+    let rust = "eyJhbGciOiJFUzI1NiIsInR5cCI6ImV4YW1wbGUrc2Qtand0In0";
+    let python = "eyJhbGciOiAiRVMyNTYiLCAidHlwIjogImV4YW1wbGUrc2Qtand0In0";
+
+    println!("rust  : {}", decode(rust));
+    println!("python: {}", decode(python));
+
+    fn decode(s: &str) -> String {
+        use base64::Engine;
+
+        let d = base64::prelude::BASE64_URL_SAFE_NO_PAD.decode(s.as_bytes()).unwrap();
+        std::str::from_utf8(&d).unwrap().to_string()
+    }
+}

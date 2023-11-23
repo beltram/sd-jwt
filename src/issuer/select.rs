@@ -1,7 +1,7 @@
 use std::ops::DerefMut;
 use std::process::Termination;
 
-use serde_json::{json, Value as JsonValue};
+use serde_json::Value as JsonValue;
 use serde_yaml::{Mapping, Value as YamlValue, Value};
 
 use crate::{core::disclosure::Disclosure, crypto::CryptoBackend, error::SdjResult, prelude::IssuerOptions};

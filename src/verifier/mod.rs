@@ -6,7 +6,7 @@ pub struct Verifier;
 
 impl Verifier {
     pub fn verify(sd_jwt: &str, alg: JwsAlgorithm, issuer_verifying_key: &str) -> SdjResult<()> {
-        let mut sd_jwt = sd_jwt.parse::<SDJwt>()?;
+        let sd_jwt = sd_jwt.parse::<SDJwt>()?;
         Ok(())
     }
 

@@ -46,10 +46,11 @@ impl serde::Serialize for Salt {
     }
 }
 
-impl ToString for Salt {
-    fn to_string(&self) -> String {
+impl std::fmt::Display for Salt {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use base64ct::Encoding as _;
-        base64ct::Base64UrlUnpadded::encode_string(&self.0)
+        let encoded = base64ct::Base64UrlUnpadded::encode_string(&self.0);
+        write!(f, "{encoded}")
     }
 }
 
@@ -73,8 +74,9 @@ impl<const SIZE: usize> std::ops::Deref for Salt<SIZE> {
 
 #[cfg(test)]
 pub mod tests {
-    use super::*;
     use rand_chacha::rand_core::SeedableRng;
+
+    use super::*;
 
     #[test]
     fn should_fail_when_size_too_small() {

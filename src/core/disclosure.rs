@@ -82,11 +82,9 @@ impl std::fmt::Display for Disclosure {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Object { salt, name, value, .. } => {
-                let salt = salt.to_string();
                 write!(f, "[\"{salt}\", \"{name}\", {value}]")
             }
             Self::Array { salt, value, .. } => {
-                let salt = salt.to_string();
                 write!(f, "[\"{salt}\", {value}]")
             }
         }
