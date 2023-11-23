@@ -1,6 +1,6 @@
 use crate::{core::disclosure::Disclosure, error::SdjResult};
 use serde::Serialize;
-use serde_json::json;
+use serde_json::{json, Value};
 
 /// A hashed (by [crate::prelude::Issuer]) [Disclosure] to be verified
 /// by a [crate::prelude::Verifier]
@@ -28,21 +28,29 @@ impl Disclosure<sha2::Sha256, 16> {
     }
 
     pub fn encode(&self) -> SdjResult<String> {
-        let mut buf = vec![];
-        let python_fmt = serde_json_python_formatter::PythonFormatter::default();
-        let mut serializer = serde_json::Serializer::with_formatter(&mut buf, python_fmt);
-
-        match self {
+        let json = match self {
             Disclosure::Object { salt, name, value, .. } => json!([salt, name, value]),
             Disclosure::Array { salt, value, .. } => json!([salt, value]),
-        }
-        .serialize(&mut serializer)?;
-        let utf8_encoded = String::from_utf8(buf)?;
+        };
 
         // this encoding might be vulnerable to side-channel attacks revealing the content being
         // encoded which should not be leaked
         use base64ct::Encoding as _;
-        let b64_encoded = base64ct::Base64UrlUnpadded::encode_string(utf8_encoded.as_bytes());
+        let b64_encoded = base64ct::Base64UrlUnpadded::encode_string(&Self::serialize_to_json_string(json)?);
         Ok(b64_encoded)
+    }
+
+    #[cfg(not(feature = "e2e-test"))]
+    fn serialize_to_json_string(json: Value) -> SdjResult<Vec<u8>> {
+        Ok(serde_json::to_vec(&json)?)
+    }
+
+    #[cfg(feature = "e2e-test")]
+    fn serialize_to_json_string(json: Value) -> SdjResult<Vec<u8>> {
+        let mut buf = vec![];
+        let python_fmt = serde_json_python_formatter::PythonFormatter::default();
+        let mut serializer = serde_json::Serializer::with_formatter(&mut buf, python_fmt);
+        json.serialize(&mut serializer)?;
+        Ok(buf)
     }
 }

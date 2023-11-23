@@ -26,7 +26,10 @@ impl SdJwtIssuance {
         // === Jws ===
         let (header, payload, signature) = sd_jwt.jws.to_parts();
         assert_eq!(header, self.protected, "SD-JWT header did not match");
-        // assert_eq!(payload, self.payload, "SD-JWT payload did not match");
+        // println!("rust  : {payload}");
+        // println!("python: {}", &self.payload);
+        assert_eq!(payload, self.payload, "SD-JWT payload did not match");
+
         // assert_eq!(signature, self.signature, "SD-JWT signature did not match");
     }
 
