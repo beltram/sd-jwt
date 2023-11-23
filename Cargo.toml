@@ -14,7 +14,7 @@ default = ["issuer", "holder", "verifier"]
 issuer = ["jwt-simple", "base64ct", "rand_chacha", "sha2", "getrandom"]
 holder = ["sha2", "jwt-simple", "base64ct"]
 verifier = ["jwt-simple", "sha2", "base64ct"]
-e2e-test = ["rand-python"]
+e2e-test = ["rand-python", "jwt-simple/python"]
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
@@ -42,7 +42,6 @@ rand-python = { version = "0.1.0", optional = true }
 version = "0.11"
 git = "https://github.com/beltram/rust-jwt-simple"
 branch = "sd-jwt"
-features = ["python"]
 optional = true
 
 [dev-dependencies]
