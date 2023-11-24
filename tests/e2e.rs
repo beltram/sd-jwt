@@ -3,7 +3,7 @@ mod test_vectors;
 use jwt_simple::prelude::*;
 use serde_json::json;
 
-use selective_disclosure_jwt::prelude::{Holder, Issuer, IssuerOptions, JwsAlgorithm, Verifier};
+use selective_disclosure_jwt::prelude::{Holder, Issuer, IssuerOptions, JwsAlgorithm, StdClaims, Verifier};
 
 #[test]
 fn e2e_test() {
@@ -15,10 +15,6 @@ fn e2e() -> Result<(), Box<dyn std::error::Error>> {
 
     // === Issuer ===
     let id_token = json!({
-        "sub": "user_42",
-        "iss": "https://example.com/issuer",
-        "iat": 1683000000,
-        "exp": 1883000000,
         "given_name": "John",
         "family_name": "Doe",
         "email": "johndoe@example.com",
@@ -58,7 +54,14 @@ fn e2e() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let mut issuer = Issuer::try_new(signature_key)?;
-    let sd_jwt = issuer.try_generate_sd_jwt(&id_token, decisions, IssuerOptions::default())?;
+    let std_claims = StdClaims {
+        subject: Some("user_42".to_string()),
+        issuer: Some("https://example.com/issuer".to_string()),
+        issued_at: Some(1683000000),
+        expiry: Some(1883000000),
+        ..Default::default()
+    };
+    let sd_jwt = issuer.try_generate_sd_jwt(&id_token, decisions, std_claims, IssuerOptions::default())?;
 
     assert_eq!(sd_jwt.disclosures.len(), decisions.len());
 

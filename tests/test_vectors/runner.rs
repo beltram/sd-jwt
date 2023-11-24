@@ -3,7 +3,7 @@ use std::error::Error;
 
 use strum::Display;
 
-use selective_disclosure_jwt::prelude::{Issuer, IssuerOptions, JwsAlgorithm};
+use selective_disclosure_jwt::prelude::{Issuer, IssuerOptions, JwsAlgorithm, StdClaims};
 
 use crate::test_vectors::{sd_jwt_issuance::SdJwtIssuance, specification::Specification};
 
@@ -35,7 +35,7 @@ impl TestRunner {
     const JWS_ALG: JwsAlgorithm = JwsAlgorithm::P256;
     const BASE: &'static str = "tests/test_vectors/testcases";
 
-    pub fn run(test: Tests) -> Result<(), Box<dyn Error>> {
+    pub fn run(test: Tests, std_claims: StdClaims) -> Result<(), Box<dyn Error>> {
         println!("\n=== Running {test} ===\n");
 
         let base_path = format!("{}/{test}", Self::BASE);
@@ -54,7 +54,7 @@ impl TestRunner {
             sign_alg: Self::JWS_ALG,
             ..Default::default()
         };
-        let sd_jwt = issuer.try_generate_sd_jwt_yaml(&specification.user_claims.into(), issuer_options)?;
+        let sd_jwt = issuer.try_generate_sd_jwt_yaml(&specification.user_claims.into(), std_claims, issuer_options)?;
 
         SdJwtIssuance::from(base_path.as_str()).verify(base_path.as_str(), &sd_jwt);
 

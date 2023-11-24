@@ -30,6 +30,7 @@ serde-json-python-formatter = "0.1"
 base64ct = { version = "1.6", optional = true }
 
 derive_more = { version = "1.0.0-beta.3", features = ["from", "as_ref", "into", "deref"] }
+fluvio-wasm-timer = "0.2"
 
 # crypto
 rand_chacha = { version = "0.3", optional = true }

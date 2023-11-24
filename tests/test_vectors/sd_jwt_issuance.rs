@@ -1,4 +1,6 @@
+use base64::Engine;
 use selective_disclosure_jwt::prelude::SDJwt;
+use serde_json::Value;
 
 /// Test struct to map the `sd_jwt_issuance.json` file in e2e tests and compare it
 /// to a SD-JWT without making a mess there
@@ -26,8 +28,10 @@ impl SdJwtIssuance {
         // === Jws ===
         let (header, payload, signature) = sd_jwt.jws.to_parts();
         assert_eq!(header, self.protected, "SD-JWT header did not match");
-        // println!("rust  : {payload}");
-        // println!("python: {}", &self.payload);
+
+        decode_payload("rust  :", payload);
+        decode_payload("python:", &self.payload);
+
         assert_eq!(payload, self.payload, "SD-JWT payload did not match");
 
         // assert_eq!(signature, self.signature, "SD-JWT signature did not match");
@@ -36,6 +40,13 @@ impl SdJwtIssuance {
     fn path(base_path: &str) -> String {
         format!("{base_path}/{}", Self::FILENAME)
     }
+}
+
+fn decode_payload(label: &str, payload: &str) {
+    let payload = base64::prelude::BASE64_URL_SAFE_NO_PAD.decode(&payload).unwrap();
+    let payload = serde_json::from_slice::<Value>(&payload).unwrap();
+    let json = serde_json::to_string_pretty(&payload).unwrap();
+    println!("{label} {payload}");
 }
 
 impl From<&str> for SdJwtIssuance {

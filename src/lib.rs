@@ -23,7 +23,7 @@ pub mod prelude {
     };
 
     #[cfg(feature = "issuer")]
-    pub use crate::issuer::{input::InputClaimSet, options::IssuerOptions, Issuer};
+    pub use crate::issuer::{input::InputClaimSet, options::IssuerOptions, std::StdClaims, Issuer};
 
     #[cfg(feature = "holder")]
     pub use crate::holder::Holder;

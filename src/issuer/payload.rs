@@ -1,12 +1,17 @@
-use crate::core::disclosure::Disclosure;
-use crate::crypto::CryptoBackend;
-use crate::error::{SdjError, SdjResult};
-use crate::issuer::options::IssuerOptions;
-use crate::prelude::InputClaimSet;
 use serde_json::json;
 
-#[derive(serde::Serialize, serde::Deserialize, derive_more::Deref)]
-pub(super) struct JwtPayload(pub(super) serde_json::Value);
+use crate::{
+    core::disclosure::Disclosure, crypto::CryptoBackend, error::SdjResult, issuer::options::IssuerOptions,
+    prelude::InputClaimSet,
+};
+
+#[derive(Debug, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+pub(super) struct JwtPayload {
+    #[serde(flatten)]
+    pub(super) values: serde_json::Value,
+    #[serde(rename = "_sd_alg")]
+    pub sd_alg: String,
+}
 
 impl JwtPayload {
     pub(super) fn try_new(
@@ -15,24 +20,21 @@ impl JwtPayload {
         options: &IssuerOptions,
     ) -> SdjResult<(JwtPayload, Vec<Disclosure>)> {
         let disclosures = input.try_select_disclosures(backend)?;
-
-        let sd_alg = options.hash_alg.to_jwt_claim();
-
-        input
-            .input
-            .as_object_mut()
-            .ok_or(SdjError::ImplementationError)?
-            .insert("_sd_alg".to_string(), json!(sd_alg));
-
-        Ok((JwtPayload(input.input), disclosures))
+        let payload = Self {
+            values: input.input,
+            sd_alg: options.hash_alg.to_jwt_claim().to_string(),
+        };
+        Ok((payload, disclosures))
     }
 }
 
 #[cfg(test)]
 pub mod tests {
-    use super::*;
-    use crate::issuer::input::InputClaimSet;
     use serde_json::json;
+
+    use crate::issuer::input::InputClaimSet;
+
+    use super::*;
 
     /// See also https://www.ietf.org/archive/id/draft-ietf-oauth-selective-disclosure-jwt-05.html#section-5.5
     #[test]
@@ -81,16 +83,16 @@ pub mod tests {
         assert_eq!(disclosures.len(), decisions.len());
 
         // hash
-        assert_eq!(payload.get("_sd_alg"), Some(&json!("sha-256")));
+        assert_eq!(payload.sd_alg, "sha-256".to_string());
 
         // visible claims
-        assert_eq!(payload.get("iss"), Some(&json!("https://example.com/issuer")));
-        assert_eq!(payload.get("iat"), Some(&json!(1683000000)));
-        assert_eq!(payload.get("exp"), Some(&json!(1883000000)));
-        assert_eq!(payload.get("sub"), Some(&json!("user_42")));
+        assert_eq!(payload.values.get("iss"), Some(&json!("https://example.com/issuer")));
+        assert_eq!(payload.values.get("iat"), Some(&json!(1683000000)));
+        assert_eq!(payload.values.get("exp"), Some(&json!(1883000000)));
+        assert_eq!(payload.values.get("sub"), Some(&json!("user_42")));
 
         // assert nationalities inner items
-        let nationalities = payload.get("nationalities").unwrap().as_array().unwrap();
+        let nationalities = payload.values.get("nationalities").unwrap().as_array().unwrap();
         assert_eq!(nationalities.len(), 2);
         for nationality in nationalities {
             let nationality = nationality.as_object().unwrap();
@@ -100,7 +102,7 @@ pub mod tests {
         }
 
         // verify disclosures hashes
-        let root_disclosures = payload.get("_sd").unwrap().as_array().unwrap();
+        let root_disclosures = payload.values.get("_sd").unwrap().as_array().unwrap();
         assert_eq!(root_disclosures.len(), 8);
         for d in root_disclosures {
             assert!(!d.as_str().unwrap().is_empty());
