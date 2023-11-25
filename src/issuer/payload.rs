@@ -1,5 +1,6 @@
 use serde_json::json;
 
+use crate::prelude::StdClaims;
 use crate::{
     core::disclosure::Disclosure, crypto::CryptoBackend, error::SdjResult, issuer::options::IssuerOptions,
     prelude::InputClaimSet,
@@ -9,6 +10,8 @@ use crate::{
 pub(super) struct JwtPayload {
     #[serde(flatten)]
     pub(super) values: serde_json::Value,
+    #[serde(flatten)]
+    pub(super) std_claims: StdClaims,
     #[serde(rename = "_sd_alg")]
     pub sd_alg: String,
 }
@@ -17,11 +20,13 @@ impl JwtPayload {
     pub(super) fn try_new(
         backend: &mut CryptoBackend,
         mut input: InputClaimSet,
+        std_claims: StdClaims,
         options: &IssuerOptions,
     ) -> SdjResult<(JwtPayload, Vec<Disclosure>)> {
         let disclosures = input.try_select_disclosures(backend)?;
         let payload = Self {
             values: input.input,
+            std_claims,
             sd_alg: options.hash_alg.to_jwt_claim().to_string(),
         };
         Ok((payload, disclosures))
@@ -78,7 +83,9 @@ pub mod tests {
         let input_claims = InputClaimSet::try_new(&input, decisions).unwrap();
 
         let options = IssuerOptions::default();
-        let (payload, disclosures) = JwtPayload::try_new(&mut CryptoBackend::new(), input_claims, &options).unwrap();
+        let std_claims = StdClaims::default();
+        let (payload, disclosures) =
+            JwtPayload::try_new(&mut CryptoBackend::new(), input_claims, std_claims, &options).unwrap();
 
         assert_eq!(disclosures.len(), decisions.len());
 

@@ -1,5 +1,4 @@
 use crate::{core::disclosure::Disclosure, error::SdjResult};
-use serde::Serialize;
 use serde_json::{json, Value};
 
 /// A hashed (by [crate::prelude::Issuer]) [Disclosure] to be verified
@@ -50,6 +49,7 @@ impl Disclosure<sha2::Sha256, 16> {
         let mut buf = vec![];
         let python_fmt = serde_json_python_formatter::PythonFormatter::default();
         let mut serializer = serde_json::Serializer::with_formatter(&mut buf, python_fmt);
+        use serde::Serialize as _;
         json.serialize(&mut serializer)?;
         Ok(buf)
     }

@@ -42,8 +42,8 @@ impl Issuer {
         options: IssuerOptions,
     ) -> SdjResult<SDJwt> {
         let input = InputClaimSet::try_new(input, decisions)?;
-        let (payload, disclosures) = JwtPayload::try_new(&mut self.backend, input, &options)?;
-        let jws = Jws::try_new(payload, std_claims, options.sign_alg, &self.signature_key)?;
+        let (payload, disclosures) = JwtPayload::try_new(&mut self.backend, input, std_claims, &options)?;
+        let jws = Jws::try_new(payload, options.sign_alg, &self.signature_key)?;
 
         Ok(SDJwt {
             jws,
@@ -59,12 +59,16 @@ impl Issuer {
         std_claims: StdClaims,
         options: IssuerOptions,
     ) -> SdjResult<SDJwt> {
-        let (payload, disclosures) = input.clone().0.try_select_items(&mut self.backend, &options)?;
+        let (values, disclosures) = input.clone().0.try_select_items(&mut self.backend, &options)?;
+
+        let sd_alg = options.hash_alg.to_jwt_claim().to_string();
         let payload = JwtPayload {
-            values: payload,
-            sd_alg: options.hash_alg.to_jwt_claim().to_string(),
+            values,
+            std_claims,
+            sd_alg,
         };
-        let jws = Jws::try_new(payload, std_claims, options.sign_alg, &self.signature_key)?;
+
+        let jws = Jws::try_new(payload, options.sign_alg, &self.signature_key)?;
         Ok(SDJwt {
             jws,
             disclosures,
