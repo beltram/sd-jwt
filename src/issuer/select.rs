@@ -1,9 +1,11 @@
+use itertools::Itertools;
 use std::ops::DerefMut;
 use std::process::Termination;
 
 use serde_json::Value as JsonValue;
 use serde_yaml::{Mapping, Value as YamlValue, Value};
 
+use crate::core::disclosure_hash::DisclosureHash;
 use crate::{core::disclosure::Disclosure, crypto::CryptoBackend, error::SdjResult, prelude::IssuerOptions};
 
 pub trait SelectDisclosures {
@@ -59,11 +61,17 @@ impl SelectDisclosures for YamlValue {
                     true
                 });
                 if !disclosures.is_empty() {
-                    let disclosure_hashes = disclosures
-                        .iter()
-                        .map(|d| d.hash().unwrap())
-                        .map(|d| YamlValue::String(d.to_string()))
-                        .collect::<Vec<_>>();
+                    let disclosure_hashes = disclosures.iter().map(|d| d.hash().unwrap()).map(|d| d.to_string());
+                    cfg_if::cfg_if! {
+                         if #[cfg(feature = "e2e-test")] {
+                            let disclosure_hashes = disclosure_hashes.sorted();
+                        } else {
+                            // TODO: shuffle
+                            let disclosure_hashes = disclosure_hashes;
+                        }
+                    }
+
+                    let disclosure_hashes = disclosure_hashes.map(YamlValue::String).collect::<Vec<_>>();
                     let disclosure_hashes = YamlValue::Sequence(disclosure_hashes);
                     obj.insert(YamlValue::String("_sd".to_string()), disclosure_hashes);
                 }

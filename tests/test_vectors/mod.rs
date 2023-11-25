@@ -6,14 +6,15 @@ pub mod sd_jwt_issuance;
 pub mod specification;
 
 const ISSUER: &'static str = "https://example.com/issuer";
+const IAT: u64 = 1683000000;
+const EXPIRY: u64 = 1883000000;
 
 #[test]
 fn sample() {
-    let now = StdClaims::now_or_epoch();
     let std_claims = StdClaims {
-        issued_at: Some(now),
-        not_before: Some(now),
-        expiry: Some(now),
+        issued_at: Some(IAT),
+        expiry: Some(EXPIRY),
+        not_before: None,
         issuer: Some(ISSUER.to_string()),
         ..Default::default()
     };
