@@ -57,6 +57,7 @@ impl Issuer {
         &mut self,
         input: &UserInput,
         std_claims: StdClaims,
+        // holder_public_key: &str,
         options: IssuerOptions,
     ) -> SdjResult<SDJwt> {
         let (values, disclosures) = input.clone().0.try_select_items(&mut self.backend, &options)?;

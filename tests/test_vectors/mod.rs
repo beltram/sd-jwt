@@ -1,5 +1,7 @@
 use crate::test_vectors::runner::{TestRunner, Tests};
+use jwt_simple::prelude::Jwk;
 use selective_disclosure_jwt::prelude::StdClaims;
+use serde_json::json;
 
 pub mod runner;
 pub mod sd_jwt_issuance;
@@ -19,4 +21,17 @@ fn sample() {
         ..Default::default()
     };
     TestRunner::run(Tests::Sample, std_claims).unwrap();
+}
+
+#[test]
+fn toto() {
+    use jwt_simple::prelude::*;
+    let jwk = json!({
+        "kty":"EC",
+        "crv":"P-256",
+        "x":"TCAER19Zvu3OHF4j4W4vfSVoHIP1ILilDls7vCeGemc",
+        "y":"ZxjiWWbZMQGHVWKVQ4hbSIirsVfuecCE6t4jT9F2HZQ"
+    });
+    let jwk = serde_json::from_value::<Jwk>(jwk).unwrap();
+    // let cnf = "{"kty":"EC","crv":"P-256","x":"TCAER19Zvu3OHF4j4W4vfSVoHIP1ILilDls7vCeGemc","y":"ZxjiWWbZMQGHVWKVQ4hbSIirsVfuecCE6t4jT9F2HZQ"}";
 }
