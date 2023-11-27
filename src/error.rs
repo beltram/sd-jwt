@@ -29,6 +29,13 @@ pub enum SdjError {
     Utf8Error(#[from] std::string::FromUtf8Error),
     #[error("Invalid Holder selection")]
     InvalidHolderSelection,
+    #[error("Invalid JWK")]
+    InvalidJwk,
+    #[error("Invalid Public key")]
+    InvalidPublicKey,
+    /// Elliptic curve error
+    #[error(transparent)]
+    Sec1Error(#[from] sec1::Error),
     #[error("Unexpected internal error")]
     ImplementationError,
 }

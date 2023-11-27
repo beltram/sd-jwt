@@ -24,6 +24,11 @@ thiserror = "1.0"
 digest = "0.10"
 base64-simd = "0.8"
 
+# feature gate those ec dependencies
+p256 = "0.13"
+p384 = "0.13"
+sec1 = "0.7"
+
 serde-json-python-formatter = "0.1"
 
 base64ct = { version = "1.6", optional = true }
