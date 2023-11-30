@@ -22,7 +22,7 @@ thiserror = "1.0"
 digest = "0.10"
 base64-simd = "0.8"
 
-jwt-simple = { version = "0.11", optional = true }
+jwt-simple = { version = "0.12", optional = true }
 
 base64ct = { version = "1.6", optional = true }
 
